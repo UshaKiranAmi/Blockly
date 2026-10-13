@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Logic Jigsaw Puzzle Replica</title>
+<style>
+    :root {
+        --board-bg: #80858b;
+        --cell-ring: #5e6369;
+        --cell-inner: #979ba1;
+        --tray-bg: #cadbe8;
+        --app-bg: #d7e7f5;
+        --overlap-red: #ff2222;
+    }
+
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: none;
+    }
+
+    body, html {
+        margin: 0; padding: 0;
+        width: 100%; height: 100%;
+        background-color: var(--app-bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        overflow: hidden;
+        user-select: none;
+        -webkit-user-select: none;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Screen Views */
+    #screens {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .screen {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 12px;
+        overflow-y: auto;
+    }
+
+    .screen.active {
+        display: flex;
+    }
+
+    /* Home & Selection Menu */
+    h1 {
+        margin: 12px 0 4px 0;
+        color: #24292e;
+        font-size: 26px;
+        text-align: center;
+    }
+    p.subtitle {
+        margin: 0 0 16px 0;
+        color: #555;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .btn-action-primary {
+        width: 90%;
+        max-width: 380px;
+        padding: 14px 18px;
+        background: #2365e6;
+        color: #fff;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(35, 101, 230, 0.3);
+        margin-bottom: 18px;
+        transition: transform 0.1s, background 0.2s;
+    }
+    .btn-action-primary:active {
+        transform: scale(0.97);
+        background: #1852c0;
+    }
+
+    .level-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        width: 90%;
+        max-width: 380px;
+        margin-bottom: 24px;
+    }
+
+    .level-btn {
+        aspect-ratio: 1;
+        background: #ffffff;
+        border: 2px solid #b8c9d9;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #2b3a4a;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.06);
+        transition: transform 0.1s, background 0.15s;
+    }
+    .level-btn:active {
+        transform: scale(0.93);
+        background: #eef4f9;
+    }
+
+    /* Game Header & UI */
+    #header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        max-width: 420px;
+        height: 44px;
+        margin-bottom: 6px;
+    }
+    .badge {
+        font-size: 16px;
+        font-weight: 700;
+        color: #2b3a4a;
+    }
+    .ctrl-btns {
+        display: flex;
+        gap: 8px;
+    }
+    .ctrl-btn {
+        padding: 6px 12px;
+        background: #fff;
+        border: 1px solid #aaa;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .ctrl-btn:active { background: #e0e0e0; }
+
+    /* Board Frame & Grid */
+    #board-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 4px 0;
+    }
+
+    #board-container {
+        position: relative;
+        background: var(--board-bg);
+        border: 6px solid #585c61;
+        border-radius: 12px;
+        box-shadow: inset 0 2px 6px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.18);
+    }
+
+    /* Round Circular Inset Cells matching real product */
+    .grid-cell {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--cell-inner) 45%, var(--cell-ring) 90%);
+        border: 1px solid rgba(255,255,255,0.25);
+        pointer-events: none;
+    }
+
+    /* Pieces Tray Area */
+    #pieces-tray {
+        flex: 1;
+        width: 100%;
+        max-width: 440px;
+        background: var(--tray-bg);
+        border: 2px dashed #9fb5c7;
+        border-radius: 12px;
+        margin: 6px 0 10px 0;
+        padding: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        justify-content: center;
+        gap: 8px;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    /* Base Piece Styling */
+    .piece {
+        box-sizing: border-box;
+        border-radius: 6px;
+        position: absolute;
+        cursor: grab;
+        border: 2px solid rgba(0, 0, 0, 0.25);
+        box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.28);
+        transition: outline 0.15s, box-shadow 0.15s;
+    }
+
+    .piece:active {
+        cursor: grabbing;
+    }
+
+    .piece.dragging {
+        z-index: 9999 !important;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+        opacity: 0.92;
+        transform: scale(1.02);
+    }
+
+    /* Overlap Alert Highlight */
+    .piece.colliding {
+        outline: 4px solid var(--overlap-red) !important;
+        outline-offset: -2px;
+        box-shadow: 0 0 12px rgba(255, 34, 34, 0.8) !important;
+        animation: pulseColliding 1s infinite alternate;
+    }
+
+    @keyframes pulseColliding {
+        0% { outline-color: #ff2222; }
+        100% { outline-color: #ff9999; }
+    }
+
+    /* Black Question Blocks */
+    .fixed-block {
+        background: #18191a !important;
+        border-color: #050505 !important;
+    }
+
+    /* Custom Mode Action bar */
+    #setup-bar {
+        display: none;
+        width: 100%;
+        max-width: 420px;
+        justify-content: space-between;
+        margin-bottom: 6px;
+    }
+
+    #confetti-canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        z-index: 10000;
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+<div id="screens">
+    <!-- Screen: Home / Level Selection -->
+    <div id="home-screen" class="screen active">
+        <h1>Logic Jigsaw</h1>
+        <p class="subtitle">Mondrian Logic Challenge</p>
+        <button class="btn-action-primary" id="btn-create-custom">✏️ Set Custom Puzzle</button>
+        <div style="font-weight: 700; color: #485460; margin-bottom: 8px;">Select Challenge (1 - 16)</div>
+        <div class="level-grid" id="level-list"></div>
+    </div>
+
+    <!-- Screen: Play / Setup Board -->
+    <div id="game-screen" class="screen">
+        <div id="header">
+            <span class="badge" id="level-title">Level 1</span>
+            <span class="badge" id="timer">00:00</span>
+            <div class="ctrl-btns">
+                <button class="ctrl-btn" id="btn-pause">Pause</button>
+                <button class="ctrl-btn" id="btn-home">Exit</button>
+            </div>
+        </div>
+
+        <!-- Custom Mode Setup Banner -->
+        <div id="setup-bar">
+            <span style="font-size: 13px; font-weight: bold; color: #18191a;">Arrange 3 black pieces on the board</span>
+            <button class="ctrl-btn" style="background:#2365e6; color:#fff;" id="btn-start-custom">Start Game</button>
+        </div>
+
+        <div id="board-wrapper">
+            <div id="board-container"></div>
+        </div>
+
+        <div style="font-size: 11px; color: #5a6673; margin: 2px 0;">Tip: Tap a piece to rotate 90° • Drag to position</div>
+        <div id="pieces-tray"></div>
+    </div>
+</div>
+
+<canvas id="confetti-canvas"></canvas>
+
+<script>
+/**
+ * Logic Jigsaw Puzzle Engine
+ * - 8x8 Board
+ * - 3 Black Blocks: 1x1, 1x2, 1x3 (6 units)
+ * - 8 Colored Blocks: 1x4, 1x5, 2x2, 2x3, 2x4, 2x5, 3x3, 3x4 (58 units)
+ * - Total grid coverage: 64 units
+ */
+
+const BOARD_SIZE = 8;
+
+// Colored Answer Pieces Specification
+const PIECE_DEFS = [
+    { id: 'p_1x4', w: 1, h: 4, color: '#e61c24' }, // Red
+    { id: 'p_1x5', w: 1, h: 5, color: '#ffffff' }, // White
+    { id: 'p_2x2', w: 2, h: 2, color: '#e61c24' }, // Red
+    { id: 'p_2x3', w: 2, h: 3, color: '#fce21b' }, // Yellow
+    { id: 'p_2x4', w: 2, h: 4, color: '#1c52d4' }, // Blue
+    { id: 'p_2x5', w: 2, h: 5, color: '#1c52d4' }, // Blue
+    { id: 'p_3x3', w: 3, h: 3, color: '#ffffff' }, // White
+    { id: 'p_3x4', w: 3, h: 4, color: '#fce21b' }  // Yellow
+];
+
+// Question Pieces Specification
+const QUESTION_DEFS = [
+    { id: 'q_1x1', w: 1, h: 1, color: '#1a1a1a', isFixed: true },
+    { id: 'q_1x2', w: 1, h: 2, color: '#1a1a1a', isFixed: true },
+    { id: 'q_1x3', w: 1, h: 3, color: '#1a1a1a', isFixed: true }
+];
+
+// 16 Official Manual Configurations [x, y, w, h]
+const LEVELS = [
+    [[0,2,1,1], [0,5,2,1], [6,4,1,3]], // 01
+    [[1,2,2,1], [2,2,3,1], [5,6,1,2]], // 02
+    [[3,1,1,3], [2,5,3,1], [6,6,1,1]], // 03
+    [[1,0,1,1], [5,2,3,1], [6,6,2,1]], // 04
+    [[2,5,1,1], [2,2,1,3], [3,1,2,1]], // 05
+    [[1,6,3,1], [5,1,1,2], [7,0,1,1]], // 06
+    [[0,0,1,1], [2,2,2,1], [2,4,3,1]], // 07
+    [[0,0,1,1], [5,2,1,3], [6,4,2,1]], // 08
+    [[3,6,1,2], [5,3,1,2], [4,4,2,1]], // 09
+    [[0,1,1,1], [4,2,1,2], [4,3,4,1]], // 10
+    [[1,4,2,1], [1,6,1,1], [4,2,3,1]], // 11
+    [[7,0,1,1], [5,2,2,1], [4,4,1,3]], // 12
+    [[0,0,3,1], [5,0,2,1], [1,5,1,1]], // 13
+    [[0,0,3,1], [4,1,2,1], [3,5,1,1]], // 14
+    [[0,4,2,1], [0,6,3,1], [5,3,1,1]], // 15
+    [[0,3,1,2], [3,3,1,2], [4,1,1,1]]  // 16
+];
+
+// State
+let cellSize = 40;
+let currentLevelIndex = -1;
+let isCustomMode = false;
+let isSetupPhase = false;
+let timerInterval = null;
+let elapsedSeconds = 0;
+let isPaused = false;
+let pieceStates = {}; // id -> { id, w, h, x, y, onBoard, color, isFixed }
+let activePointer = null;
+
+// Audio Synthesizer (Zero External Dependencies)
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function ensureAudio() {
+    if (!audioCtx) audioCtx = new AudioContext();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playSound(type) {
+    try {
+        ensureAudio();
+        const t = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'tap') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(550, t);
+            gain.gain.setValueAtTime(0.08, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+            osc.start(t);
+            osc.stop(t + 0.08);
+            if (navigator.vibrate) navigator.vibrate(12);
+        } else if (type === 'snap') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(280, t);
+            osc.frequency.setValueAtTime(440, t + 0.04);
+            gain.gain.setValueAtTime(0.12, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+            osc.start(t);
+            osc.stop(t + 0.12);
+            if (navigator.vibrate) navigator.vibrate(25);
+        } else if (type === 'overlap') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(160, t);
+            gain.gain.setValueAtTime(0.12, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+            osc.start(t);
+            osc.stop(t + 0.16);
+            if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
+        } else if (type === 'win') {
+            const freqs = [392, 523.25, 659.25, 783.99, 1046.50];
+            freqs.forEach((f, idx) => {
+                const o = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                o.type = 'triangle';
+                o.frequency.setValueAtTime(f, t + idx * 0.12);
+                g.gain.setValueAtTime(0.15, t + idx * 0.12);
+                g.gain.exponentialRampToValueAtTime(0.0001, t + idx * 0.12 + 0.35);
+                o.connect(g);
+                g.connect(audioCtx.destination);
+                o.start(t + idx * 0.12);
+                o.stop(t + idx * 0.12 + 0.36);
+            });
+            if (navigator.vibrate) navigator.vibrate([80, 50, 100, 50, 180]);
+        }
+    } catch(e){}
+}
+
+// Layout Calculation (Ensuring 1:1 Scale consistency across Mobile and Desktop)
+const boardContainer = document.getElementById('board-container');
+const trayContainer = document.getElementById('pieces-tray');
+
+function computeDynamicDimensions() {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    // Reserve vertical space for header (50), tray (~170), tip (20), padding (30)
+    const availableHeightForBoard = screenHeight - 270;
+    const availableWidthForBoard = screenWidth - 36;
+    
+    const boardDim = Math.min(390, availableWidthForBoard, availableHeightForBoard);
+    cellSize = Math.floor(boardDim / BOARD_SIZE);
+    
+    const finalBoardSize = cellSize * BOARD_SIZE;
+    boardContainer.style.width = finalBoardSize + 'px';
+    boardContainer.style.height = finalBoardSize + 'px';
+    
+    renderGridCircles();
+    syncAllPieceElements();
+}
+
+function renderGridCircles() {
+    boardContainer.querySelectorAll('.grid-cell').forEach(c => c.remove());
+    const inset = Math.floor(cellSize * 0.12);
+    const circleSize = cellSize - (inset * 2);
+
+    for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            cell.style.left = (c * cellSize + inset) + 'px';
+            cell.style.top = (r * cellSize + inset) + 'px';
+            cell.style.width = circleSize + 'px';
+            cell.style.height = circleSize + 'px';
+            boardContainer.appendChild(cell);
+        }
+    }
+}
+
+// Initialize Screens & Level Selection
+const levelList = document.getElementById('level-list');
+for (let i = 1; i <= 16; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'level-btn';
+    btn.innerText = i < 10 ? '0' + i : i;
+    btn.onclick = () => startCampaignLevel(i - 1);
+    levelList.appendChild(btn);
+}
+
+document.getElementById('btn-create-custom').onclick = () => startCustomSetupMode();
+
+function startCampaignLevel(levelIdx) {
+    currentLevelIndex = levelIdx;
+    isCustomMode = false;
+    isSetupPhase = false;
+    
+    document.getElementById('level-title').innerText = `Level ${levelIdx + 1}`;
+    document.getElementById('setup-bar').style.display = 'none';
+    document.getElementById('header').style.display = 'flex';
+    switchScreen('game-screen');
+    computeDynamicDimensions();
+    
+    pieceStates = {};
+    const qData = LEVELS[levelIdx];
+    // Instantiate 3 fixed black questions
+    QUESTION_DEFS.forEach((q, idx) => {
+        const item = qData[idx];
+        pieceStates[q.id] = {
+            id: q.id,
+            w: item[2],
+            h: item[3],
+            x: item[0],
+            y: item[1],
+            onBoard: true,
+            color: '#1a1a1a',
+            isFixed: true
+        };
+    });
+
+    // Instantiate 8 answer pieces in tray
+    PIECE_DEFS.forEach(p => {
+        pieceStates[p.id] = {
+            id: p.id,
+            w: p.w,
+            h: p.h,
+            x: 0,
+            y: 0,
+            onBoard: false,
+            color: p.color,
+            isFixed: false
+        };
+    });
+
+    renderPieceElements();
+    resetAndStartTimer();
+}
+
+function startCustomSetupMode() {
+    isCustomMode = true;
+    isSetupPhase = true;
+    currentLevelIndex = -1;
+    
+    document.getElementById('level-title').innerText = 'Custom Mode';
+    document.getElementById('setup-bar').style.display = 'flex';
+    document.getElementById('header').style.display = 'flex';
+    switchScreen('game-screen');
+    computeDynamicDimensions();
+    
+    pieceStates = {};
+    // Give player the 3 question pieces to position
+    QUESTION_DEFS.forEach(q => {
+        pieceStates[q.id] = {
+            id: q.id,
+            w: q.w,
+            h: q.h,
+            x: 0,
+            y: 0,
+            onBoard: false,
+            color: '#1a1a1a',
+            isFixed: false // movable during setup
+        };
+    });
+
+    renderPieceElements();
+    resetTimerDisplay();
+}
+
+document.getElementById('btn-start-custom').onclick = function() {
+    // Check if all 3 question pieces are placed legally on the board
+    const qPieces = QUESTION_DEFS.map(q => pieceStates[q.id]);
+    const allPlaced = qPieces.every(p => p.onBoard);
+    if (!allPlaced) {
+        alert("Please place all 3 black question pieces on the board before starting.");
+        return;
+    }
+    
+    const hasOverlap = validateCollisions();
+    if (hasOverlap) {
+        playSound('overlap');
+        alert("The black pieces are overlapping! Please arrange them without overlaps.");
+        return;
+    }
+
+    // Lock question pieces in place
+    qPieces.forEach(p => p.isFixed = true);
+    isSetupPhase = false;
+    document.getElementById('setup-bar').style.display = 'none';
+
+    // Now spawn the 8 puzzle answer pieces in tray
+    PIECE_DEFS.forEach(p => {
+        pieceStates[p.id] = {
+            id: p.id,
+            w: p.w,
+            h: p.h,
+            x: 0,
+            y: 0,
+            onBoard: false,
+            color: p.color,
+            isFixed: false
+        };
+    });
+
+    renderPieceElements();
+    resetAndStartTimer();
+};
+
+function renderPieceElements() {
+    // Clear existing
+    document.querySelectorAll('.piece').forEach(el => el.remove());
+
+    Object.values(pieceStates).forEach(state => {
+        const el = document.createElement('div');
+        el.className = 'piece' + (state.isFixed ? ' fixed-block' : '');
+        el.id = 'dom_' + state.id;
+        el.style.backgroundColor = state.color;
+        el.style.width = (state.w * cellSize) + 'px';
+        el.style.height = (state.h * cellSize) + 'px';
+        
+        attachPointerEvents(el, state.id);
+        
+        if (state.onBoard) {
+            el.style.position = 'absolute';
+            el.style.left = (state.x * cellSize) + 'px';
+            el.style.top = (state.y * cellSize) + 'px';
+            boardContainer.appendChild(el);
+        } else {
+            el.style.position = 'relative';
+            el.style.left = '0px';
+            el.style.top = '0px';
+            trayContainer.appendChild(el);
+        }
+    });
+
+    validateCollisions();
+}
+
+function syncAllPieceElements() {
+    Object.values(pieceStates).forEach(state => {
+        const el = document.getElementById('dom_' + state.id);
+        if (!el) return;
+        el.style.width = (state.w * cellSize) + 'px';
+        el.style.height = (state.h * cellSize) + 'px';
+        if (state.onBoard) {
+            el.style.left = (state.x * cellSize) + 'px';
+            el.style.top = (state.y * cellSize) + 'px';
+        }
+    });
+}
+
+// Rotation & Drag Handling
+function attachPointerEvents(el, id) {
+    let startX = 0, startY = 0;
+    let initialLeft = 0, initialTop = 0;
+    let hasMoved = false;
+
+    el.onpointerdown = (e) => {
+        const state = pieceStates[id];
+        if (state.isFixed && (!isCustomMode || !isSetupPhase)) return; // locked piece
+        if (isPaused) return;
+
+        e.preventDefault();
+        ensureAudio();
+        
+        activePointer = {
+            id,
+            pointerId: e.pointerId,
+            el
+        };
+        el.setPointerCapture(e.pointerId);
+
+        startX = e.clientX;
+        startY = e.clientY;
+        hasMoved = false;
+
+        const rect = el.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+
+        // Move to document body during drag for smooth fluid coordinate tracking
+        el.classList.add('dragging');
+        document.body.appendChild(el);
+        el.style.position = 'fixed';
+        el.style.left = initialLeft + 'px';
+        el.style.top = initialTop + 'px';
+    };
+
+    el.onpointermove = (e) => {
+        if (!activePointer || activePointer.id !== id) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        if (Math.hypot(dx, dy) > 6) {
+            hasMoved = true;
+        }
+
+        el.style.left = (initialLeft + dx) + 'px';
+        el.style.top = (initialTop + dy) + 'px';
+    };
+
+    el.onpointerup = (e) => {
+        if (!activePointer || activePointer.id !== id) return;
+        el.releasePointerCapture(e.pointerId);
+        el.classList.remove('dragging');
+        activePointer = null;
+
+        const state = pieceStates[id];
+
+        // 1. Detection of Tap -> Rotate 90 Degrees
+        if (!hasMoved) {
+            rotatePiece(state, el);
+            return;
+        }
+
+        // 2. Detection of Drag Drop -> Snap to Board or Tray
+        const bRect = boardContainer.getBoundingClientRect();
+        const pRect = el.getBoundingClientRect();
+
+        const relX = pRect.left - bRect.left;
+        const relY = pRect.top - bRect.top;
+
+        const targetCol = Math.round(relX / cellSize);
+        const targetRow = Math.round(relY / cellSize);
+
+        // Check board boundary placement
+        if (targetCol >= 0 && targetRow >= 0 && 
+            (targetCol + state.w) <= BOARD_SIZE && 
+            (targetRow + state.h) <= BOARD_SIZE) {
+            
+            // Placed on board
+            state.onBoard = true;
+            state.x = targetCol;
+            state.y = targetRow;
+
+            boardContainer.appendChild(el);
+            el.style.position = 'absolute';
+            el.style.left = (state.x * cellSize) + 'px';
+            el.style.top = (state.y * cellSize) + 'px';
+
+            playSound('snap');
+        } else {
+            // Drop outside -> Return to Tray
+            returnPieceToTray(state, el);
+        }
+
+        validateCollisions();
+        checkVictoryCondition();
+    };
+}
+
+function rotatePiece(state, el) {
+    // Swap width and height
+    const prevW = state.w;
+    const prevH = state.h;
+    state.w = prevH;
+    state.h = prevW;
+
+    // Boundary adjust if rotation pushes piece out of board
+    if (state.onBoard) {
+        if (state.x + state.w > BOARD_SIZE) state.x = BOARD_SIZE - state.w;
+        if (state.y + state.h > BOARD_SIZE) state.y = BOARD_SIZE - state.h;
+        if (state.x < 0) state.x = 0;
+        if (state.y < 0) state.y = 0;
+
+        boardContainer.appendChild(el);
+        el.style.position = 'absolute';
+        el.style.left = (state.x * cellSize) + 'px';
+        el.style.top = (state.y * cellSize) + 'px';
+    } else {
+        trayContainer.appendChild(el);
+        el.style.position = 'relative';
+        el.style.left = '0px';
+        el.style.top = '0px';
+    }
+
+    el.style.width = (state.w * cellSize) + 'px';
+    el.style.height = (state.h * cellSize) + 'px';
+
+    playSound('tap');
+    validateCollisions();
+    checkVictoryCondition();
+}
+
+function returnPieceToTray(state, el) {
+    state.onBoard = false;
+    trayContainer.appendChild(el);
+    el.style.position = 'relative';
+    el.style.left = '0px';
+    el.style.top = '0px';
+    playSound('snap');
+}
+
+// Collision & Overlap Validator
+function validateCollisions() {
+    let hasAnyOverlap = false;
+    const piecesOnBoard = Object.values(pieceStates).filter(p => p.onBoard);
+
+    // Reset collision states
+    piecesOnBoard.forEach(p => {
+        const el = document.getElementById('dom_' + p.id);
+        if (el) el.classList.remove('colliding');
+    });
+
+    for (let i = 0; i < piecesOnBoard.length; i++) {
+        for (let j = i + 1; j < piecesOnBoard.length; j++) {
+            const p1 = piecesOnBoard[i];
+            const p2 = piecesOnBoard[j];
+
+            const overlap = !(
+                p1.x + p1.w <= p2.x ||
+                p2.x + p2.w <= p1.x ||
+                p1.y + p1.h <= p2.y ||
+                p2.y + p2.h <= p1.y
+            );
+
+            if (overlap) {
+                hasAnyOverlap = true;
+                const el1 = document.getElementById('dom_' + p1.id);
+                const el2 = document.getElementById('dom_' + p2.id);
+                if (el1) el1.classList.add('colliding');
+                if (el2) el2.classList.add('colliding');
+            }
+        }
+    }
+
+    return hasAnyOverlap;
+}
+
+// Win Evaluation: 64 of 64 grid cells covered, 0 overlap, all pieces on board
+function checkVictoryCondition() {
+    if (isSetupPhase) return; // Do not win during setup
+
+    const pieces = Object.values(pieceStates);
+    const allPlaced = pieces.every(p => p.onBoard);
+    if (!allPlaced) return;
+
+    const hasOverlap = validateCollisions();
+    if (hasOverlap) {
+        playSound('overlap');
+        return;
+    }
+
+    // Verify cell coverage
+    const grid = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(0));
+    pieces.forEach(p => {
+        for (let r = p.y; r < p.y + p.h; r++) {
+            for (let c = p.x; c < p.x + p.w; c++) {
+                grid[r][c]++;
+            }
+        }
+    });
+
+    let complete = true;
+    for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+            if (grid[r][c] !== 1) complete = false;
+        }
+    }
+
+    if (complete) {
+        clearInterval(timerInterval);
+        playSound('win');
+        triggerConfettiCelebration();
+        setTimeout(() => {
+            alert(`🎉 Success! Level solved in ${document.getElementById('timer').innerText}!`);
+        }, 300);
+    }
+}
+
+// Timer Controls
+function resetAndStartTimer() {
+    clearInterval(timerInterval);
+    elapsedSeconds = 0;
+    isPaused = false;
+    document.getElementById('btn-pause').innerText = 'Pause';
+    updateTimerText();
+    timerInterval = setInterval(() => {
+        if (!isPaused) {
+            elapsedSeconds++;
+            updateTimerText();
+        }
+    }, 1000);
+}
+
+function resetTimerDisplay() {
+    clearInterval(timerInterval);
+    elapsedSeconds = 0;
+    updateTimerText();
+}
+
+function updateTimerText() {
+    const mins = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+    const secs = String(elapsedSeconds % 60).padStart(2, '0');
+    document.getElementById('timer').innerText = `${mins}:${secs}`;
+}
+
+document.getElementById('btn-pause').onclick = function() {
+    if (isSetupPhase) return;
+    isPaused = !isPaused;
+    this.innerText = isPaused ? 'Resume' : 'Pause';
+    boardContainer.style.opacity = isPaused ? '0.2' : '1';
+    trayContainer.style.opacity = isPaused ? '0.2' : '1';
+};
+
+document.getElementById('btn-home').onclick = function() {
+    clearInterval(timerInterval);
+    switchScreen('home-screen');
+};
+
+function switchScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+// Responsive layout watcher
+window.addEventListener('resize', () => {
+    if (document.getElementById('game-screen').classList.contains('active')) {
+        computeDynamicDimensions();
+    }
+});
+
+// Full Confetti Particle Engine
+function triggerConfettiCelebration() {
+    const cvs = document.getElementById('confetti-canvas');
+    cvs.style.display = 'block';
+    cvs.width = window.innerWidth;
+    cvs.height = window.innerHeight;
+    const ctx = cvs.getContext('2d');
+    
+    const colors = ['#e61c24', '#fce21b', '#1c52d4', '#ffffff', '#2ecc71', '#9b59b6'];
+    const particles = [];
+
+    for (let i = 0; i < 140; i++) {
+        particles.push({
+            x: cvs.width * 0.5,
+            y: cvs.height * 0.5,
+            w: Math.random() * 8 + 6,
+            h: Math.random() * 5 + 4,
+            vx: (Math.random() - 0.5) * 22,
+            vy: (Math.random() - 0.7) * 20,
+            angle: Math.random() * 360,
+            vRot: (Math.random() - 0.5) * 12,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            alpha: 1
+        });
+    }
+
+    let frame = 0;
+    function render() {
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+        let alive = false;
+
+        particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.35; // Gravity
+            p.vx *= 0.98;
+            p.angle += p.vRot;
+
+            if (frame > 60) p.alpha -= 0.015;
+
+            if (p.alpha > 0 && p.y < cvs.height) {
+                alive = true;
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, p.alpha);
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.angle * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                ctx.restore();
+            }
+        });
+
+        frame++;
+        if (alive) {
+            requestAnimationFrame(render);
+        } else {
+            cvs.style.display = 'none';
+        }
+    }
+    requestAnimationFrame(render);
+}
+</script>
+</body>
+</html>
