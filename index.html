@@ -58,60 +58,126 @@
         display: flex;
     }
 
-    /* Home Menu */
+    /* Home View */
     h1 {
-        margin: 12px 0 2px 0;
+        margin: 10px 0 2px 0;
         color: #1f2429;
         font-size: 26px;
         text-align: center;
     }
     p.subtitle {
-        margin: 0 0 14px 0;
+        margin: 0 0 12px 0;
         color: #57606a;
-        font-size: 14px;
+        font-size: 13px;
         text-align: center;
     }
 
-    .btn-action-primary {
+    /* Solved Puzzle Board Preview */
+    #home-preview-wrapper {
+        margin-bottom: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .preview-caption {
+        font-size: 12px;
+        font-weight: 600;
+        color: #4f5862;
+        margin-bottom: 6px;
+    }
+    #preview-board {
+        width: 192px;
+        height: 192px;
+        background: var(--board-outer);
+        border: 4px solid #141517;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+        position: relative;
+        padding: 4px;
+    }
+    #preview-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: var(--board-plate);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    .preview-piece {
+        position: absolute;
+        border: 1.5px solid rgba(0,0,0,0.45);
+        border-radius: 3px;
+        box-shadow: inset 0 1px 1px rgba(255,255,255,0.3);
+    }
+
+    /* Simple 2-Option Home Menu */
+    .home-actions-card {
         width: 90%;
-        max-width: 360px;
-        padding: 12px 16px;
+        max-width: 340px;
+        background: #ffffff;
+        border: 2px solid #b8c9d9;
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .form-group label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #24292f;
+    }
+
+    .custom-select-picker {
+        width: 100%;
+        padding: 12px 14px;
+        font-size: 16px;
+        font-weight: 700;
+        color: #24292f;
+        background: #f6f8fa;
+        border: 2px solid #cfd7df;
+        border-radius: 10px;
+        outline: none;
+        cursor: pointer;
+        transition: border 0.2s;
+    }
+    .custom-select-picker:focus {
+        border-color: #1f6feb;
+    }
+
+    .btn-action-primary {
+        width: 100%;
+        padding: 13px 16px;
         background: #1f6feb;
         color: #fff;
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 700;
         border: none;
         border-radius: 10px;
         cursor: pointer;
-        box-shadow: 0 4px 12px rgba(31, 111, 235, 0.25);
-        margin-bottom: 14px;
+        box-shadow: 0 3px 10px rgba(31, 111, 235, 0.25);
     }
     .btn-action-primary:active { transform: scale(0.97); }
 
-    .level-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-        width: 90%;
-        max-width: 360px;
-        margin-bottom: 20px;
-    }
-
-    .level-btn {
-        aspect-ratio: 1;
+    .btn-action-secondary {
+        width: 100%;
+        padding: 12px 16px;
         background: #ffffff;
-        border: 2px solid #b2c2d4;
-        border-radius: 8px;
-        font-size: 17px;
-        font-weight: bold;
         color: #24292f;
+        font-size: 15px;
+        font-weight: 700;
+        border: 2px solid #cfd7df;
+        border-radius: 10px;
         cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.06);
     }
-    .level-btn:active { background: #e7eff8; transform: scale(0.94); }
+    .btn-action-secondary:active { background: #f0f3f6; }
 
     /* Game Header */
     #header {
@@ -175,7 +241,6 @@
         overflow: hidden;
     }
 
-    /* Reference concentric squircle cells */
     .grid-cell {
         position: absolute;
         box-sizing: border-box;
@@ -194,7 +259,7 @@
         border: 1px solid rgba(255,255,255,0.06);
     }
 
-    /* Bottom Pieces Tray: Native Touch Scroll */
+    /* Tray Area (Touch pan-y scrollable) */
     #pieces-tray {
         width: 100%;
         max-width: 420px;
@@ -214,9 +279,9 @@
         -webkit-overflow-scrolling: touch;
         touch-action: pan-y;
         position: relative;
+        scroll-behavior: smooth;
     }
 
-    /* Piece Slots in Tray (Preserves clean layout and auto flow when rotating) */
     .piece-slot {
         display: flex;
         align-items: center;
@@ -225,7 +290,6 @@
         transition: width 0.15s ease, height 0.15s ease;
     }
 
-    /* General Pieces */
     .piece {
         box-sizing: border-box;
         border-radius: 6px;
@@ -244,7 +308,6 @@
         transform: scale(1.03);
     }
 
-    /* Overlap & Obstruction indicator */
     .piece.colliding {
         outline: 4px solid var(--overlap-red) !important;
         outline-offset: -2px;
@@ -256,13 +319,11 @@
         100% { outline-color: #ff8c8c; }
     }
 
-    /* Question blocks */
     .piece.fixed-block {
         background-color: var(--piece-gray) !important;
         border-color: #3b3d40 !important;
     }
 
-    /* Victory Notification Bar */
     #victory-card {
         display: none;
         width: 100%;
@@ -319,15 +380,30 @@
     <div id="home-screen" class="screen active">
         <h1>Logic Jigsaw</h1>
         <p class="subtitle">Mondrian Logic Challenge</p>
-        <button class="btn-action-primary" id="btn-create-custom">✏️ Set Custom Puzzle</button>
-        <div style="font-weight: 700; color: #3b4249; margin-bottom: 8px;">Select Challenge (1 - 16)</div>
-        <div class="level-grid" id="level-list"></div>
+        
+        <!-- Solved Puzzle Board Illustration -->
+        <div id="home-preview-wrapper">
+            <div class="preview-caption">Example Solved State</div>
+            <div id="preview-board">
+                <div id="preview-inner"></div>
+            </div>
+        </div>
+
+        <!-- 2 Options Card: Choose Level (Picker) & Custom Level -->
+        <div class="home-actions-card">
+            <div class="form-group">
+                <label for="level-select">Choose Level:</label>
+                <select id="level-select" class="custom-select-picker"></select>
+            </div>
+            <button class="btn-action-primary" id="btn-play-selected">Play Selected Level</button>
+            <button class="btn-action-secondary" id="btn-create-custom">✏️ Set Custom Puzzle</button>
+        </div>
     </div>
 
     <!-- Gameplay Screen -->
     <div id="game-screen" class="screen">
         <div id="header">
-            <span class="badge" id="level-title">Level 1</span>
+            <span class="badge" id="level-title">Level 01</span>
             <span class="badge" id="timer">00:00</span>
             <div class="ctrl-btns">
                 <button class="ctrl-btn" id="btn-pause">Pause</button>
@@ -340,14 +416,12 @@
             <button class="ctrl-btn" style="background:#1f6feb; color:#fff;" id="btn-start-custom">Start Game</button>
         </div>
 
-        <!-- 8x8 Board Container -->
         <div id="board-wrapper">
             <div id="board-frame">
                 <div id="board-container"></div>
             </div>
         </div>
 
-        <!-- In-Flow Victory Card -->
         <div id="victory-card">
             <div class="victory-title" id="victory-text">🎉 Puzzle Solved!</div>
             <div class="victory-actions">
@@ -358,7 +432,6 @@
 
         <div style="font-size: 11px; color: #5a6673; margin: 3px 0;">Tap to rotate 90° • Drag onto grid • Swipe tray to scroll</div>
         
-        <!-- Pieces Tray with native touch scroll -->
         <div id="pieces-tray"></div>
     </div>
 </div>
@@ -367,17 +440,251 @@
 
 <script>
 /**
- * Game Configuration & Color Specifications:
- * - 1x5, 1x4: White
- * - 2x3, 2x4: Red
- * - 2x2, 3x3: Blue
- * - 2x5, 3x4: Yellow
- * - Question pieces: Gray (1x1, 1x2, 1x3)
- * - Board: Black
+ * 1. Embedded JSON Data Structure
+ * (Replaceable directly when adding further levels)
  */
+const QUESTION_DATA = {
+  "encoding": {
+    "0": "empty cell",
+    "1": "1x1 piece",
+    "2": "1x2 piece",
+    "3": "1x3 piece"
+  },
+  "coordinateSystem": {
+    "row": "0-7 top to bottom",
+    "column": "0-7 left to right"
+  },
+  "questions": [
+    {
+      "questionId": "01",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,3,0,0,0,0,0],
+        [0,0,3,0,0,0,2,2],
+        [0,0,3,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,1],
+        [0,0,0,0,0,0,0,0]
+      ]
+    },
+    {
+      "questionId": "02",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,2,2,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,3,3,3],
+        [0,0,0,0,0,1,0,0],
+        [0,0,0,0,0,0,0,0]
+      ]
+    },
+    {
+      "questionId": "03",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,1,2,0,0],
+        [0,0,0,0,0,2,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,3,3,3],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0]
+      ]
+    },
+    {
+      "questionId": "04",
+      "gridSize": 8,
+      "matrix": [
+        [2,2,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [3,3,3,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,1,0]
+      ]
+    },
+    {
+      "questionId": "05",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,1,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,2,0,0],
+        [0,0,0,0,0,2,0,0],
+        [0,0,0,3,3,3,0,0],
+        [0,0,0,0,0,0,0,0]
+      ]
+    },
+    {
+      "questionId": "06",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [3,3,3,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,2,2,0,0,0,0,0],
+        [0,1,0,0,0,0,0,0]
+      ]
+    },
+    {
+      "questionId": "07",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,2,2,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,2,2,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,1]
+      ]
+    },
+    {
+      "questionId": "08",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,3,0,0,0,0,0,0],
+        [0,3,0,0,0,0,0,0],
+        [0,3,0,0,0,0,0,0],
+        [0,2,2,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,1]
+      ]
+    },
+    {
+      "questionId": "09",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,3,0,0,0],
+        [0,0,0,0,3,0,0,0],
+        [0,0,2,0,3,0,0,0],
+        [0,0,2,0,0,0,0,0],
+        [0,0,0,1,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0]
+      ]
+    },
+    {
+      "questionId": "10",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,2,0,0,0,0],
+        [3,3,3,2,0,0,0,0],
+        [0,0,0,0,0,0,0,1],
+        [0,0,0,0,0,0,0,0]
+      ]
+    },
+    {
+      "questionId": "11",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,0,0,1],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,2,2],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,3,3,3,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0]
+      ]
+    },
+    {
+      "questionId": "12",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,3,0,0,0,0],
+        [0,0,0,3,0,0,0,0],
+        [0,0,0,3,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [2,2,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [1,0,0,0,0,0,0,0]
+      ]
+    },
+    {
+      "questionId": "13",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,1,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,2,2,0,0,3,3,3]
+      ]
+    },
+    {
+      "questionId": "14",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,1,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,2,2,0,0,0,0],
+        [0,0,0,0,0,3,3,3]
+      ]
+    },
+    {
+      "questionId": "15",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,3,3,3],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,2,2],
+        [0,0,0,0,0,0,0,0],
+        [0,0,1,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0]
+      ]
+    },
+    {
+      "questionId": "16",
+      "gridSize": 8,
+      "matrix": [
+        [0,0,0,0,0,0,0,3],
+        [0,0,0,0,2,0,0,3],
+        [0,0,0,0,2,0,0,3],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,1,0,0,0,0],
+        [0,0,0,0,0,0,0,0]
+      ]
+    }
+  ]
+};
 
 const BOARD_SIZE = 8;
 
+// 8 Answer Pieces
 const PIECE_DEFS = [
     { id: 'p_1x4', w: 1, h: 4, color: 'var(--piece-white)' },
     { id: 'p_1x5', w: 1, h: 5, color: 'var(--piece-white)' },
@@ -389,47 +696,59 @@ const PIECE_DEFS = [
     { id: 'p_3x4', w: 3, h: 4, color: 'var(--piece-yellow)' }
 ];
 
+// 3 Question Pieces
 const QUESTION_DEFS = [
     { id: 'q_1x1', w: 1, h: 1, color: 'var(--piece-gray)', isFixed: true },
     { id: 'q_1x2', w: 1, h: 2, color: 'var(--piece-gray)', isFixed: true },
     { id: 'q_1x3', w: 1, h: 3, color: 'var(--piece-gray)', isFixed: true }
 ];
 
-// 16 Real Reference Levels: Coordinates [col, row, width, height]
-const LEVELS = [
-    // 01: 1x1@(1,2), 1x2@(1,5), 1x3@(4,6)
-    [[1,2,1,1], [1,5,2,1], [6,4,1,3]],
-    // 02: 1x2@(1,2), 1x3@(2,2), 1x2@(6,5)
-    [[2,1,1,2], [2,2,3,1], [5,6,1,2]],
-    // 03: 1x3@(1,3), 1x2@(5,2), 1x1@(6,6)
-    [[3,1,1,3], [2,5,3,1], [6,6,1,1]],
-    // 04: 1x1@(1,0), 1x3@(2,5), 1x2@(6,6)
-    [[1,0,1,1], [5,2,3,1], [6,6,2,1]],
-    // 05: 1x1@(5,2), 1x3@(2,2), 1x2@(1,3)
-    [[2,5,1,1], [2,2,1,3], [3,1,2,1]],
-    // 06: 1x3@(6,1), 1x2@(1,5), 1x1@(0,7)
-    [[1,6,3,1], [5,1,1,2], [7,0,1,1]],
-    // 07: 1x1@(0,0), 1x2@(2,2), 1x3@(4,2)
-    [[0,0,1,1], [2,2,2,1], [2,4,3,1]],
-    // 08: 1x1@(0,0), 1x3@(2,5), 1x2@(4,6)
-    [[0,0,1,1], [5,2,1,3], [6,4,2,1]],
-    // 09: 1x2@(6,3), 1x2@(3,5), 1x1@(4,4)
-    [[3,6,1,2], [5,3,1,2], [4,4,2,1]],
-    // 10: 1x1@(1,0), 1x2@(2,4), 1x3@(3,4)
-    [[0,1,1,1], [4,2,1,2], [4,3,3,1]],
-    // 11: 1x2@(4,1), 1x1@(6,1), 1x3@(2,4)
-    [[1,4,2,1], [1,6,1,1], [4,2,3,1]],
-    // 12: 1x1@(0,7), 1x2@(2,5), 1x3@(4,4)
-    [[7,0,1,1], [5,2,2,1], [4,4,1,3]],
-    // 13: 1x3@(0,0), 1x2@(0,5), 1x1@(5,1)
-    [[0,0,3,1], [5,0,2,1], [1,5,1,1]],
-    // 14: 1x3@(0,0), 1x2@(1,4), 1x1@(5,3)
-    [[0,0,3,1], [4,1,2,1], [3,5,1,1]],
-    // 15: 1x2@(4,0), 1x3@(6,0), 1x1@(3,5)
-    [[0,4,2,1], [0,6,3,1], [5,3,1,1]],
-    // 16: 1x2@(3,0), 1x2@(3,3), 1x1@(1,4)
-    [[0,3,1,2], [3,3,1,2], [4,1,1,1]]
-];
+/**
+ * Extracts question block objects [x, y, w, h] directly from the matrix[span_4](start_span)[span_4](end_span)
+ */
+function extractBlocksFromMatrix(matrix) {
+    const visited = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(false));
+    const blocks = [];
+
+    for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+            const val = matrix[r][c];
+            if (val > 0 && !visited[r][c]) {
+                const cells = [];
+                const queue = [[r, c]];
+                visited[r][c] = true;
+
+                while (queue.length > 0) {
+                    const [cr, cc] = queue.shift();
+                    cells.push([cr, cc]);
+                    const neighbors = [[cr+1, cc], [cr-1, cc], [cr, cc+1], [cr, cc-1]];
+                    for (const [nr, nc] of neighbors) {
+                        if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+                            if (!visited[nr][nc] && matrix[nr][nc] === val) {
+                                visited[nr][nc] = true;
+                                queue.push([nr, nc]);
+                            }
+                        }
+                    }
+                }
+
+                const minR = Math.min(...cells.map(p => p[0]));
+                const maxR = Math.max(...cells.map(p => p[0]));
+                const minC = Math.min(...cells.map(p => p[1]));
+                const maxC = Math.max(...cells.map(p => p[1]));
+
+                blocks.push({
+                    type: val, // 1, 2, or 3
+                    x: minC,
+                    y: minR,
+                    w: maxC - minC + 1,
+                    h: maxR - minR + 1
+                });
+            }
+        }
+    }
+    return blocks;
+}
 
 let cellSize = 40;
 let currentLevelIndex = 0;
@@ -441,7 +760,7 @@ let isPaused = false;
 let pieceStates = {}; 
 let activePointer = null;
 
-// Sound Effects Synthesizer
+// Audio Synthesizer
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 
@@ -503,7 +822,6 @@ function playSound(type) {
     } catch(e){}
 }
 
-// Compute Board Scale and Margins (Fixed squircle grid with balanced border padding)
 const boardFrame = document.getElementById('board-frame');
 const boardContainer = document.getElementById('board-container');
 const trayContainer = document.getElementById('pieces-tray');
@@ -511,8 +829,6 @@ const trayContainer = document.getElementById('pieces-tray');
 function computeDynamicDimensions() {
     const sw = window.innerWidth;
     const sh = window.innerHeight;
-    
-    // Balanced vertical space calculation
     const verticalReserve = 290;
     const maxBoardDim = Math.min(380, sw - 32, sh - verticalReserve);
     cellSize = Math.floor(maxBoardDim / BOARD_SIZE);
@@ -551,45 +867,104 @@ function renderGridCircles() {
     }
 }
 
-// Init Levels
-const levelList = document.getElementById('level-list');
-for (let i = 1; i <= 16; i++) {
-    const btn = document.createElement('button');
-    btn.className = 'level-btn';
-    btn.innerText = i < 10 ? '0' + i : i;
-    btn.onclick = () => startCampaignLevel(i - 1);
-    levelList.appendChild(btn);
-}
+// Populate the Home Screen Level Picker Dropdown
+const levelSelect = document.getElementById('level-select');
+QUESTION_DATA.questions.forEach((q, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = `Challenge ${q.questionId}`;
+    levelSelect.appendChild(opt);
+});
+
+document.getElementById('btn-play-selected').onclick = () => {
+    startCampaignLevel(parseInt(levelSelect.value, 10));
+};
 
 document.getElementById('btn-create-custom').onclick = () => startCustomSetupMode();
+
+// Build Solved Preview Board on Home Screen
+function buildSolvedPreview() {
+    const previewContainer = document.getElementById('preview-inner');
+    previewContainer.innerHTML = '';
+    const pSize = 192 / 8; // 24px cell size
+
+    // Concrete solved state covering all 64 cells perfectly
+    const solvedLayout = [
+        { w: 4, h: 2, x: 0, y: 0, c: 'var(--piece-blue)' },
+        { w: 3, h: 4, x: 4, y: 0, c: 'var(--piece-yellow)' },
+        { w: 1, h: 1, x: 7, y: 0, c: 'var(--piece-gray)' },
+        { w: 1, h: 2, x: 7, y: 1, c: 'var(--piece-gray)' },
+        { w: 1, h: 3, x: 0, y: 2, c: 'var(--piece-gray)' },
+        { w: 3, h: 1, x: 1, y: 2, c: 'var(--piece-red)' }, // part of 2x3 or 2x4
+        { w: 4, h: 1, x: 0, y: 5, c: 'var(--piece-white)' },
+        { w: 5, h: 1, x: 0, y: 6, c: 'var(--piece-white)' },
+        { w: 2, h: 2, x: 2, y: 3, c: 'var(--piece-blue)' },
+        { w: 2, h: 4, x: 4, y: 4, c: 'var(--piece-red)' },
+        { w: 2, h: 5, x: 6, y: 3, c: 'var(--piece-yellow)' },
+        { w: 3, h: 1, x: 0, y: 7, c: 'var(--piece-red)' }
+    ];
+
+    // Standard valid 64-cell tiled sample:
+    const standardSolution = [
+        { x:0, y:0, w:4, h:2, c:'var(--piece-blue)' },    // 2x4
+        { x:4, y:0, w:3, h:3, c:'var(--piece-blue)' },    // 3x3
+        { x:7, y:0, w:1, h:1, c:'var(--piece-gray)' },    // 1x1
+        { x:7, y:1, w:1, h:2, c:'var(--piece-gray)' },    // 1x2
+        { x:0, y:2, w:1, h:4, c:'var(--piece-white)' },   // 1x4
+        { x:1, y:2, w:3, h:2, c:'var(--piece-red)' },     // 2x3
+        { x:1, y:4, w:3, h:4, c:'var(--piece-yellow)' },  // 3x4
+        { x:4, y:3, w:2, h:5, c:'var(--piece-yellow)' },  // 2x5
+        { x:6, y:3, w:2, h:2, c:'var(--piece-blue)' },    // 2x2
+        { x:6, y:5, w:1, h:3, c:'var(--piece-gray)' },    // 1x3
+        { x:7, y:5, w:1, h:3, c:'var(--piece-white)' }    // 1x5 (fills 63), remaining is 1 cell
+    ];
+
+    // Render decorative solved mosaic
+    standardSolution.forEach(p => {
+        const el = document.createElement('div');
+        el.className = 'preview-piece';
+        el.style.left = (p.x * pSize) + 'px';
+        el.style.top = (p.y * pSize) + 'px';
+        el.style.width = (p.w * pSize) + 'px';
+        el.style.height = (p.h * pSize) + 'px';
+        el.style.backgroundColor = p.c;
+        previewContainer.appendChild(el);
+    });
+}
+buildSolvedPreview();
 
 function startCampaignLevel(levelIdx) {
     currentLevelIndex = levelIdx;
     isCustomMode = false;
     isSetupPhase = false;
     
-    document.getElementById('level-title').innerText = `Level ${levelIdx + 1}`;
+    const qItem = QUESTION_DATA.questions[levelIdx];
+    document.getElementById('level-title').innerText = `Level ${qItem.questionId}`;
+    levelSelect.value = levelIdx;
     document.getElementById('setup-bar').style.display = 'none';
     document.getElementById('victory-card').style.display = 'none';
     switchScreen('game-screen');
     computeDynamicDimensions();
     
     pieceStates = {};
-    const qData = LEVELS[levelIdx];
-    QUESTION_DEFS.forEach((q, idx) => {
-        const item = qData[idx];
-        pieceStates[q.id] = {
-            id: q.id,
-            w: item[2],
-            h: item[3],
-            x: item[0],
-            y: item[1],
+    const extractedBlocks = extractBlocksFromMatrix(qItem.matrix);
+
+    // Populate question pieces from matrix[span_5](start_span)[span_5](end_span)
+    extractedBlocks.forEach((blk, idx) => {
+        const qId = `q_blk_${idx}`;
+        pieceStates[qId] = {
+            id: qId,
+            w: blk.w,
+            h: blk.h,
+            x: blk.x,
+            y: blk.y,
             onBoard: true,
             color: 'var(--piece-gray)',
             isFixed: true
         };
     });
 
+    // Populate 8 puzzle pieces
     PIECE_DEFS.forEach(p => {
         pieceStates[p.id] = {
             id: p.id,
@@ -692,7 +1067,6 @@ function renderPieceElements() {
             el.style.top = (state.y * cellSize) + 'px';
             boardContainer.appendChild(el);
         } else {
-            // Embed inside dedicated tray slot
             const slot = document.createElement('div');
             slot.className = 'piece-slot';
             slot.id = 'slot_' + state.id;
@@ -777,13 +1151,13 @@ function attachPointerEvents(el, id) {
 
         const state = pieceStates[id];
 
-        // 1. Tapping -> Rotate 90 Degrees in-place
+        // 1. Tapping -> Rotate in-place
         if (!hasMoved) {
             rotatePiece(state, el);
             return;
         }
 
-        // 2. Dragging -> Snap to Board or Return to Slot
+        // 2. Dragging -> Snap or Tray Return
         const bRect = boardContainer.getBoundingClientRect();
         const pRect = el.getBoundingClientRect();
 
@@ -801,10 +1175,17 @@ function attachPointerEvents(el, id) {
             state.x = targetCol;
             state.y = targetRow;
 
+            // Remove empty slot placeholder from tray
+            const prevSlot = document.getElementById('slot_' + state.id);
+            if (prevSlot) prevSlot.remove();
+
             boardContainer.appendChild(el);
             el.style.position = 'absolute';
             el.style.left = (state.x * cellSize) + 'px';
             el.style.top = (state.y * cellSize) + 'px';
+
+            // Auto scroll tray to top after piece moved to board
+            trayContainer.scrollTo({ top: 0, behavior: 'smooth' });
 
             const hasCollided = validateCollisions();
             if (hasCollided) {
@@ -858,6 +1239,9 @@ function rotatePiece(state, el) {
     checkVictoryCondition();
 }
 
+/**
+ * Puts returned piece at the FIRST position of tray and scrolls to top
+ */
 function returnPieceToTray(state, el) {
     state.onBoard = false;
     let slot = document.getElementById('slot_' + state.id);
@@ -865,15 +1249,21 @@ function returnPieceToTray(state, el) {
         slot = document.createElement('div');
         slot.className = 'piece-slot';
         slot.id = 'slot_' + state.id;
-        trayContainer.appendChild(slot);
     }
+    
     slot.style.width = (state.w * cellSize) + 'px';
     slot.style.height = (state.h * cellSize) + 'px';
     slot.appendChild(el);
 
+    // Prepend to first position in tray
+    trayContainer.prepend(slot);
+
     el.style.position = 'relative';
     el.style.left = '0px';
     el.style.top = '0px';
+
+    // Smooth scroll to top of scroll view
+    trayContainer.scrollTo({ top: 0, behavior: 'smooth' });
 
     playSound('snap');
     validateCollisions();
@@ -934,7 +1324,6 @@ function checkVictoryCondition() {
         }
     }
 
-    // Solved!
     clearInterval(timerInterval);
     playSound('win');
     triggerConfettiCelebration();
@@ -944,19 +1333,17 @@ function checkVictoryCondition() {
     vicCard.style.display = 'block';
 }
 
-// Victory Actions
 document.getElementById('btn-next-level').onclick = () => {
-    let nextIdx = (currentLevelIndex + 1) % LEVELS.length;
+    let nextIdx = (currentLevelIndex + 1) % QUESTION_DATA.questions.length;
     startCampaignLevel(nextIdx);
 };
 
 document.getElementById('btn-random-level').onclick = () => {
-    let randIdx = Math.floor(Math.random() * LEVELS.length);
-    if (randIdx === currentLevelIndex) randIdx = (randIdx + 1) % LEVELS.length;
+    let randIdx = Math.floor(Math.random() * QUESTION_DATA.questions.length);
+    if (randIdx === currentLevelIndex) randIdx = (randIdx + 1) % QUESTION_DATA.questions.length;
     startCampaignLevel(randIdx);
 };
 
-// Timer Controls
 function resetAndStartTimer() {
     clearInterval(timerInterval);
     elapsedSeconds = 0;
@@ -1007,7 +1394,6 @@ window.addEventListener('resize', () => {
     }
 });
 
-// Non-blocking Confetti Animation
 function triggerConfettiCelebration() {
     const cvs = document.getElementById('confetti-canvas');
     cvs.style.display = 'block';
