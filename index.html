@@ -823,15 +823,37 @@ function playSound(type) {
             osc.start(t);
             osc.stop(t + 0.14);
             if (navigator.vibrate) navigator.vibrate(20);
-        } else if (type === 'error') {
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(140, t);
-            gain.gain.setValueAtTime(0.2, t);
-            gain.gain.linearRampToValueAtTime(0.001, t + 0.22);
+        } 
+        // else if (type === 'error') {
+        //     osc.type = 'sawtooth';
+        //     osc.frequency.setValueAtTime(140, t);
+        //     gain.gain.setValueAtTime(0.2, t);
+        //     gain.gain.linearRampToValueAtTime(0.001, t + 0.22);
+        //     osc.start(t);
+        //     osc.stop(t + 0.22);
+        //     if (navigator.vibrate) navigator.vibrate([40, 50, 40]);
+        // } 
+        else if (type === 'error') {
+            // Smooth, subtle error tone
+            osc.type = 'sine'; // Soft, warm tone without buzzy harmonics
+            
+            // Pitch gently glides downward (subtle rejection cue)
+            osc.frequency.setValueAtTime(220, t);
+            osc.frequency.exponentialRampToValueAtTime(140, t + 0.18);
+            
+            // Gain envelope: fast 5ms attack to avoid clicking, followed by a soft decay
+            gain.gain.setValueAtTime(0.0001, t);
+            gain.gain.linearRampToValueAtTime(0.08, t + 0.005); // Lower peak volume (0.08 vs 0.2)
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+            
             osc.start(t);
-            osc.stop(t + 0.22);
-            if (navigator.vibrate) navigator.vibrate([40, 50, 40]);
-        } else if (type === 'win') {
+            osc.stop(t + 0.18);
+            
+            // Lighter, single haptic tap instead of three hard pulses
+            if (navigator.vibrate) navigator.vibrate(30);
+        } 
+        
+        else if (type === 'win') {
             const notes = [440, 554.37, 659.25, 880];
             notes.forEach((freq, i) => {
                 const o = audioCtx.createOscillator();
